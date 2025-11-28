@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 214 73% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 214 73% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 214 73% 15%;
+  --primary: 214 73% 15%;
+  --primary-foreground: 0 0% 100%;
+  --primary-hover: 214 73% 20%;
+  --primary-muted: 214 26% 95%;
+  --secondary: 214 26% 95%;
+  --secondary-foreground: 214 73% 15%;
+  --secondary-hover: 214 26% 90%;
+  --secondary-muted: 214 26% 98%;
+  --accent: 166 60% 42%;
+  --accent-foreground: 0 0% 100%;
+  --accent-hover: 166 60% 37%;
+  --accent-muted: 166 60% 95%;
+  --muted: 214 26% 95%;
+  --muted-foreground: 214 25% 45%;
+  --muted-dark: 214 26% 90%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --warning: 43 89% 58%;
+  --warning-foreground: 214 73% 15%;
+  --success: 166 60% 42%;
+  --success-foreground: 0 0% 100%;
+  --border: 214 26% 88%;
+  --input: 214 26% 88%;
+  --ring: 166 60% 42%;
+  --radius: .75rem;
+}
+
+* {
+  font-family: 'Inter', sans-serif;
+}
