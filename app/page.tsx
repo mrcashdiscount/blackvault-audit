@@ -31,6 +31,7 @@ export default function BlackVaultAuditTool() {
   const [step, setStep] = useState(1);
   const [currentRate, setCurrentRate] = useState(0);
   const [annualOvercharge, setAnnualOvercharge] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const { register, handleSubmit, watch } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -77,18 +78,42 @@ export default function BlackVaultAuditTool() {
     { label: 'Hidden / Special Fees', amount: values.otherFees || 0 },
   ];
 
-  const generatePDF = async () => {
-    const element = document.getElementById('results');
-    if (!element) return;
+  const generatePDFAndCaptureLead = async (data: FormData) => {
+    setSubmitting(true);
+    try {
+      // Generate PDF
+      const element = document.getElementById('results');
+      if (element) {
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`BlackVault_Audit_${(data.businessName || 'Report').replace(/\s+/g, '_')}.pdf`);
+      }
 
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Send to TPOS (server action)
+      const response = await fetch('/api/capture-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          currentRate: currentRate.toFixed(2),
+          annualOvercharge,
+          annualSavings: annualOvercharge, // Mirror for now
+        }),
+      });
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`BlackVault_Audit_${(values.businessName || 'Report').replace(/\s+/g, '_')}.pdf`);
+      if (!response.ok) throw new Error('Lead capture failed');
+      
+      alert('Audit PDF downloaded! Lead sent to TPOS dashboard.');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('PDF generated, but lead sync failed—check console.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -101,7 +126,7 @@ export default function BlackVaultAuditTool() {
           <p className="text-xl opacity-90">See exactly how much you’re overpay — instantly.</p>
         </div>
 
-        <form onSubmit={handleSubmit(generatePDF)}>
+        <form onSubmit={handleSubmit(generatePDFAndCaptureLead)}>
           {step === 1 && (
             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-10 shadow-2xl border border-white/20">
               <h2 className="text-3xl font-bold mb-8 flex items-center gap-4">
@@ -208,9 +233,12 @@ export default function BlackVaultAuditTool() {
                 </div>
 
                 <div className="text-center mt-16">
-                  <button type="submit" className="bg-gradient-to-r from-[hsl(166,60%,42%)] to-emerald-600 text-white font-black text-3xl px-24 py-8 rounded-3xl hover:scale-110 transition shadow-2xl inline-flex items-center gap-6">
-                    <Download className="w-12 h-12" />
-                    Download Your Forensic Audit PDF
+                  <button 
+                    type="submit" 
+                    disabled={submitting}
+                    className="bg-gradient-to-r from-[hsl(166,60%,42%)] to-emerald-600 text-white font-black text-3xl px-24 py-8 rounded-3xl hover:scale-110 transition shadow-2xl inline-flex items-center gap-6 disabled:opacity-50"
+                  >
+                    {submitting ? 'Sending...' : <><Download className="w-12 h-12" />Download Your Forensic Audit PDF</>}
                   </button>
                 </div>
               </div>
