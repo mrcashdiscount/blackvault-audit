@@ -123,7 +123,7 @@ export default function BlackVaultAuditTool() {
           <h1 className="text-5xl md:text-6xl font-black mb-4">
             Black Vault <span className="text-[hsl(166,60%,42%)]">Forensic Audit</span>
           </h1>
-          <p className="text-xl opacity-90">See exactly how much you’re overpay — instantly.</p>
+          <p className="text-xl opacity-90">See exactly how much you’re overpaying — instantly.</p>
         </div>
 
         <form onSubmit={handleSubmit(generatePDFAndCaptureLead)}>
